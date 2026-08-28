@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+tests/
+outputs/
+data/
+赛题资料及数据集/
