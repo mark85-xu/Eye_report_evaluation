@@ -148,16 +148,24 @@ expected_ids 相比 missing=0 且 extra=0 / predicted_report 无空无纯空格 
 分词 sanity check / GBK round-trip。全部通过打印 `Submission : VALID`，
 否则 `FAIL` 并列出具体问题。
 
-## 11. METEOR 为什么可能被跳过
+## 11. METEOR 的运行环境
 
-METEOR 依赖 Java（Stanford Parser jar）。当前 Linux 环境若未安装 Java 或
-初始化失败，`text_metrics` 会捕获异常并输出：
+METEOR 依赖 `java`（`pycocoevalcap` 的 `meteor-1.5.jar` 与 `data/paraphrase-en.gz`
+已随包捆绑，**只需 Java 可执行文件在 PATH 上**，无需单独安装 Stanford Parser）。
+安装方式二选一：
 
+```bash
+# 方式一：系统包（需 sudo）
+sudo apt-get install -y default-jre-headless
+
+# 方式二：便携版 JRE（无需 root，下载解压后加入 PATH）
+curl -L -x http://127.0.0.1:7897 -o jre17.tar.gz \
+    "https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jre/hotspot/normal/eclipse"
+tar -xzf jre17.tar.gz
+export PATH="$PWD/jdk-17*/bin:$PATH"   # 运行评测前先 export
 ```
-METEOR: skipped
-reason: <异常信息>
-```
 
+若 `java` 缺失或初始化失败，`text_metrics` 会捕获异常并输出 `METEOR: skipped`，
 **不会**因为 METEOR 阻塞 BLEU + ROUGE_L 主链路。BLEU-4 始终可用。
 
 ## 12. Clinical Metric 与官方排名的关系

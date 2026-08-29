@@ -158,6 +158,7 @@ def main() -> int:
         "BLEU_3",
         "BLEU_4",
         "ROUGE_L",
+        "METEOR",
     ]
     per_sample = per_sample[per_sample_cols]
 
@@ -173,9 +174,12 @@ def main() -> int:
 
     print("========== Proxy Evaluation ==========")
     print(f"N              : {metrics['summary']['n_samples']}")
-    for key in ["BLEU_1", "BLEU_2", "BLEU_3", "BLEU_4", "ROUGE_L"]:
+    for key in ["BLEU_1", "BLEU_2", "BLEU_3", "BLEU_4", "ROUGE_L", "METEOR"]:
         marker = " (PRIMARY)" if key == "BLEU_4" else ""
-        print(f"{key:<15}: {metrics['summary'][key]}{marker}")
+        val = metrics['summary'].get(key)
+        if isinstance(val, float):
+            val = f"{val:.6f}"
+        print(f"{key:<15}: {val}{marker}")
     print(f"METEOR status  : {metrics['summary'].get('meteor_status')}")
     print("NOTE: PROXY evaluation, NOT official testOffLine score.")
     print("=======================================")

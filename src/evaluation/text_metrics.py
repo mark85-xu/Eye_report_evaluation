@@ -15,9 +15,10 @@ Interface notes (verified against the installed pycocoevalcap 1.2 source):
 * ``Rouge().compute_score`` returns ``(corpus_mean, np.array per_sentence)``.
 * ``Meteor().compute_score`` returns ``(corpus_mean, list per_sentence)``.
 
-METEOR is optional: it shells out to a Java process.  When Java / the
-Stanford parser is unavailable the module reports ``meteor_status: skipped``
-instead of failing the whole BLEU + ROUGE pipeline.
+METEOR is optional: it shells out to a Java process (the pycocoevalcap
+meteor jar + paraphrase data are bundled; only a ``java`` binary on PATH is
+required).  When Java is unavailable the module reports ``meteor_status:
+skipped`` instead of failing the whole BLEU + ROUGE pipeline.
 """
 
 from __future__ import annotations
@@ -120,6 +121,7 @@ def evaluate_text_metrics(
 
     # ---- METEOR (optional) ----
     meteor_corpus = None
+    meteor_per_sample: dict = {}
     meteor_status = "skipped"
     meteor_reason = None
     if enable_meteor:
@@ -141,8 +143,12 @@ def evaluate_text_metrics(
                 Meteor.__del__ = _safe_del
 
             meteor_scorer = Meteor()
-            meteor_corpus, _ = meteor_scorer.compute_score(gts, res)
+            meteor_corpus, meteor_sent = meteor_scorer.compute_score(gts, res)
             meteor_corpus = float(meteor_corpus)
+            for j, i in enumerate(ids):
+                meteor_per_sample[i] = (
+                    float(meteor_sent[j]) if j < len(meteor_sent) else None
+                )
             meteor_status = "ok"
         except Exception as exc:  # noqa: BLE001 - never let METEOR block the pipeline
             meteor_status = "skipped"
@@ -153,6 +159,7 @@ def evaluate_text_metrics(
         row = {"id": i}
         row.update(bleu["per_sample"][i])
         row["ROUGE_L"] = rouge["per_sample"].get(i)
+        row["METEOR"] = meteor_per_sample.get(i)
         per_sample_rows.append(row)
 
     summary: dict[str, Any] = {

@@ -54,7 +54,7 @@ Eye_report_evaluation/
 |---|---|---|
 | **BLEU-4** | 主指标（决定排名） | pycocoevalcap，另附 BLEU-1/2/3 |
 | ROUGE_L | 辅助 | pycocoevalcap |
-| METEOR | 辅助（可选） | 需要 Java + Stanford parser；缺失时 `meteor_status: skipped` |
+| METEOR | 辅助（可选） | 需要 `java` 在 PATH 上（jar 与 paraphrase 数据已随 pycocoevalcap 打包）；缺失时 `meteor_status: skipped` |
 | Clinical (P1) | 分析辅助 | 复用冻结 `report_parser`，衡量医疗语义一致性，**非官方排名指标** |
 
 ### 约束
@@ -69,8 +69,10 @@ Eye_report_evaluation/
 ### 1. 环境与依赖
 ```bash
 python -m pip install jieba pandas numpy pycocoevalcap
-# 可选：若需要真正跑出 METEOR 分数，另装 Java 与 Stanford parser
-# （未安装时 METEOR 自动跳过，不影响 BLEU/ROUGE_L）
+# 可选：若需要真正跑出 METEOR 分数，安装 Java 并保证 `java` 在 PATH 上
+#   sudo apt-get install -y default-jre-headless
+# 或使用便携版 JRE（免 root，详见 src/evaluation/README.md 第 11 节）
+# 未安装时 METEOR 自动跳过，不影响 BLEU/ROUGE_L
 ```
 
 ### 2. 数据准备
@@ -107,6 +109,6 @@ python scripts/make_submission.py \
 
 1. 官方分词实现是否 = jieba + `medical_dict_final.txt` + 空格连接（当前从官方 gts 样本反推）。
 2. 保留全角标点、移除 `CDFI` 这两个代理决策是否与官方一致。
-3. METEOR 是否计入官方指标（当前本机无 Java，默认 skipped）。
+3. METEOR 是否计入官方指标（已在本机装 Java 跑通，默认 `ok`；是否被官方采用仍待确认）。
 4. 官方 BLEU 的实现与聚合方式。
 5. 官方对 `image_id` 缺失/多余/重复的容忍度（validator 当前按最严口径）。
