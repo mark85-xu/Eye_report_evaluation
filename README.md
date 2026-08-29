@@ -11,6 +11,7 @@
 ```
 Eye_report_evaluation/
 ├── README.md                        # 本文件：结构 / 指标 / 部署
+├── CHANGELOG.md                     # 更新记录（v0.1.1 起，含 METEOR 链路）
 ├── scripts/
 │   ├── evaluate_reports.py          # 评测 CLI：对 Val 预测计算 BLEU/ROUGE_L/临床指标
 │   └── make_submission.py           # 提交 CLI：从原始预测生成官方格式 res.csv
@@ -19,7 +20,7 @@ Eye_report_evaluation/
     │   └── report_parser.py         # 冻结版 v0.1.1 规则解析器（7 个 P0 概念）
     │                                #   —— 仅供 clinical_metric 复用，勿修改
     └── evaluation/
-        ├── __init__.py              # 导出入口，__version__ = "0.1.0"
+        ├── __init__.py              # 导出入口，__version__ = "0.1.1"
         ├── tokenizer.py             # 唯一分词入口：jieba + 医学字典 → 空格连接
         ├── text_metrics.py          # BLEU-1/2/3/4 + ROUGE_L + METEOR(可选)
         ├── formatter.py             # res.csv 生成（内部 id → official image_id，GBK）
@@ -90,7 +91,7 @@ python scripts/evaluate_reports.py \
     --medical-dict <medical_dict_final.txt> \
     --output-dir <out_dir>
 ```
-输出：`metrics_summary.json`（corpus 分数）、`per_sample_metrics.csv`（逐样本 BLEU/ROUGE_L + 原始/分词文本）、`clinical_summary.json` / `clinical_per_sample.csv`（P1）。
+输出：`metrics_summary.json`（corpus 分数，含 METEOR）、`per_sample_metrics.csv`（逐样本 BLEU_1-4 / ROUGE_L / METEOR + 原始/分词文本）、`clinical_summary.json` / `clinical_per_sample.csv`（P1）。
 
 ### 4. 生成官方格式 res.csv（并自检）
 ```bash
@@ -112,3 +113,14 @@ python scripts/make_submission.py \
 3. METEOR 是否计入官方指标（已在本机装 Java 跑通，默认 `ok`；是否被官方采用仍待确认）。
 4. 官方 BLEU 的实现与聚合方式。
 5. 官方对 `image_id` 缺失/多余/重复的容忍度（validator 当前按最严口径）。
+
+---
+
+## 五、更新记录
+
+| 版本 | 日期 | 内容 |
+|---|---|---|
+| v0.1.1 | 2026-08-29 | **METEOR 评测链路打通**（逐样本 METEOR + Java 部署文档）；修复 `.gitignore` 误排除导致 `src/data/report_parser.py` 缺失 |
+| v0.1.0 | 2026-08-28 | 初始版本：代理评测系统（BLEU-4 主指标 + ROUGE_L + Clinical P1，res.csv 生成与校验） |
+
+完整变更说明见 [CHANGELOG.md](CHANGELOG.md)。
